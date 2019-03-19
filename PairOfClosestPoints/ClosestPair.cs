@@ -64,7 +64,7 @@ namespace PairOfClosestPoints
 
             Result bestResult = (resultS1.Distance <= resultS2.Distance) ? resultS1 : resultS2;
 
-            var splitResult = GetClosestSplitPair(Sx, Sy, bestResult, line);
+            var splitResult = GetClosestSplitPair(Sx, Sy, bestResult, line, S1x);
 
             return (bestResult.Distance <= splitResult.Distance) ? bestResult : splitResult;
         }
@@ -100,14 +100,19 @@ namespace PairOfClosestPoints
             }
             return bruteForceResult;
         }
-        public Result GetClosestSplitPair(List<Point> Sx, List<Point> Sy, Result bestResult, int line)
+        public Result GetClosestSplitPair(List<Point> Sx, List<Point> Sy, Result bestResult, int line, List<Point> S1x)
         {
-            var splitY = new List<Point>();
+            var R = new List<Point>();
+            var B = new List<Point>();
             foreach (var point in Sy)
             {
-                if ((line - bestResult.Distance <= point.X) && (point.X <= line + bestResult.Distance))
+                if ((line - bestResult.Distance <= point.X) && (point.X <= line) && S1x.Contains(point))
                 {
-                    splitY.Add(point);
+                    R.Add(point);                 
+                }
+                else if ((line + bestResult.Distance >= point.X) && (point.X >= line) && !S1x.Contains(point))
+                {
+                    B.Add(point);
                 }
             }
 
@@ -116,13 +121,41 @@ namespace PairOfClosestPoints
                 Distance = bestResult.Distance
             };
 
-            var length = splitY.Count;
-            for (int i = 0; i < length-1; i++)
+            R.ForEach(pointR =>
             {
-                for (int j = i + 1; j < Math.Min(i + 7, length); j++)
+                B.Where(pointB => pointB.Y >= pointR.Y).Take(4).ToList().ForEach(pointB =>
+                  {
+                      var distance = pointR.GetDistance(pointB);
+                      if (distance < splitResult.Distance)
+                      {
+                          splitResult.P1 = pointR;
+                          splitResult.P2 = pointB;
+                          splitResult.Distance = distance;
+                      }
+                  });
+            });
+            B.ForEach(pointB =>
+            {
+                R.Where(pointR => pointR.Y >= pointB.Y).Take(4).ToList().ForEach(pointR =>
                 {
-                    var p1 = splitY[i];
-                    var p2 = splitY[j];
+                    var distance = pointB.GetDistance(pointR);
+                    if (distance < splitResult.Distance)
+                    {
+                        splitResult.P1 = pointB;
+                        splitResult.P2 = pointR;
+                        splitResult.Distance = distance;
+                    }
+                });
+            });
+            /*
+            var lengthR = R.Count;
+            var lengthB = B.Count;
+            for (int i = 0; i < lengthR; i++)
+            {
+                for (int j = i + 1; j < Math.Min(i + 4, lengthB); j++)
+                {
+                    var p1 = R[i];
+                    var p2 = B[j];
                     var distance = p1.GetDistance(p2);
                     if (distance < splitResult.Distance)
                     {
@@ -132,6 +165,21 @@ namespace PairOfClosestPoints
                     }
                 }
             }
+            for (int i = 0; i < lengthB - 1; i++)
+            {
+                for (int j = i + 1; j < Math.Min(i + 4, lengthR); j++)
+                {
+                    var p1 = B[i];
+                    var p2 = R[j];
+                    var distance = p1.GetDistance(p2);
+                    if (distance < splitResult.Distance)
+                    {
+                        splitResult.P1 = p1;
+                        splitResult.P2 = p2;
+                        splitResult.Distance = distance;
+                    }
+                }
+            }*/
             return splitResult;
         }
     }

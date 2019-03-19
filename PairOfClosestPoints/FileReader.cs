@@ -9,7 +9,7 @@ namespace PairOfClosestPoints
     {
         public static IList<Point> GetPoints()
         {
-            var lines = File.ReadLines("2points.txt");
+            var lines = File.ReadLines("points.txt");
             var points = new List<Point>();
             int i = 0;
             foreach (var line in lines)
