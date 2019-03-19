@@ -5,24 +5,25 @@ using System.Text;
 
 namespace PairOfClosestPoints
 {
-    public static class FileReader
+    public static class RandomGenerator
     {
         public static IList<Point> GetPoints()
         {
-            var lines = File.ReadLines("points3.txt");
             var points = new List<Point>();
-            int i = 0;
-            foreach (var line in lines)
+            for(int i = 0; i < 10000; i++)
             {
-
-                var splitted = line.Split(',');
+                Random rnd = new Random();
                 var point = new Point
                 {
                     Id = i,
-                    X = int.Parse(splitted[0]),
-                    Y = int.Parse(splitted[1])
+                    X = rnd.Next(-10000,10000),
+                    Y = rnd.Next(-10000,10000)
                 };
-                i++;
+                if(points.Exists(x=>x.Y == point.Y && x.X == point.X))
+                {
+                    continue;
+                }
+
                 points.Add(point);
             }
             return points;

@@ -9,22 +9,21 @@ namespace PairOfClosestPoints
     {
         public ClosestPair()
         {
-            var S = FileReader.GetPoints().ToList();
+            //var S = FileReader.GetPoints().ToList();
+            var S = RandomGenerator.GetPoints().ToList();
             var Sx = S.OrderBy(point => point.X).ToList();
             var Sy = S.OrderBy(point => point.Y).ToList();
-
+            var start = DateTime.Now;
             var closestPair = GetClosestPair(Sx, Sy);
-            Console.WriteLine("Closest Pair:");
-            Console.WriteLine("P1:");
-            Console.WriteLine("X = "+closestPair.P1.X);
-            Console.WriteLine("Y = " + closestPair.P1.Y);
-            Console.WriteLine("P2:");
-            Console.WriteLine("X = " + closestPair.P2.X);
-            Console.WriteLine("Y = " + closestPair.P2.Y);
-            Console.WriteLine("Distance = "+ closestPair.Distance);
-            Console.ReadLine();
+            var end = (DateTime.Now - start).TotalMilliseconds;
+            PrintResult(closestPair, end);
+            start = DateTime.Now;
+            var naiveClosestPair = NaiveResult(S);
+            end = (DateTime.Now - start).TotalMilliseconds;
+            PrintResult(naiveClosestPair, end);
+
         }
-        public Result GetClosestPair(List<Point> Sx, List<Point> Sy)
+        private Result GetClosestPair(List<Point> Sx, List<Point> Sy)
         {
             if (Sx.Count <= 3)
             {
@@ -68,7 +67,7 @@ namespace PairOfClosestPoints
 
             return (bestResult.Distance <= splitResult.Distance) ? bestResult : splitResult;
         }
-        public Result BruteForce(List<Point> Sx)
+        private Result BruteForce(List<Point> Sx)
         {
             var bruteForceResult = new Result
             {
@@ -100,7 +99,7 @@ namespace PairOfClosestPoints
             }
             return bruteForceResult;
         }
-        public Result GetClosestSplitPair(List<Point> Sx, List<Point> Sy, Result bestResult, int line, List<Point> S1x)
+        private Result GetClosestSplitPair(List<Point> Sx, List<Point> Sy, Result bestResult, int line, List<Point> S1x)
         {
             var R = new List<Point>();
             var B = new List<Point>();
@@ -181,6 +180,41 @@ namespace PairOfClosestPoints
                 }
             }*/
             return splitResult;
+        }
+        private Result NaiveResult(List<Point> S)
+        {
+            var result = new Result()
+            {
+                Distance = double.MaxValue
+            };
+
+            S.ForEach(a =>
+            {
+                S.ForEach(b =>
+                {
+                    var distance = a.GetDistance(b);
+                    if(distance>0 && distance < result.Distance)
+                    {
+                        result.Distance = distance;
+                        result.P1 = a;
+                        result.P2 = b;
+                    }
+                });
+            });
+            return result;
+        }
+        private void PrintResult(Result result, double time)
+        {
+            Console.WriteLine("Closest Pair:");
+            Console.WriteLine("P1:");
+            Console.WriteLine("X = " + result.P1.X);
+            Console.WriteLine("Y = " + result.P1.Y);
+            Console.WriteLine("P2:");
+            Console.WriteLine("X = " + result.P2.X);
+            Console.WriteLine("Y = " + result.P2.Y);
+            Console.WriteLine("Distance = " + result.Distance);
+            Console.WriteLine("Time = " + time);
+            Console.ReadLine();
         }
     }
 }
